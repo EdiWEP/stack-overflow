@@ -6,8 +6,8 @@ UPVOTE = 1
 DOWNVOTE = -1
 
 VOTE_CHOICES = [
-    (UPVOTE, 'upvote'),
-    (DOWNVOTE, 'downvote'),
+    (UPVOTE, 'up'),
+    (DOWNVOTE, 'down'),
 ]
 
 
@@ -59,7 +59,7 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def vote_count(self):
+    def score(self):
         """Returns the answers's score: upvotes - downvotes"""
         upvotes = self.votes.filter(value=UPVOTE).count()
         downvotes = self.votes.filter(value=DOWNVOTE).count()

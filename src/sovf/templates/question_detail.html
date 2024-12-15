@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ question.title }}</h1>
+<p>{{ question.content }}</p>
+<p>Author: {{ question.author.username }}</p>
+{% if question.author == user %}
+    <a href="{% url 'question_edit' pk=question.id %}">Edit Question</a>
+    <a href="{% url 'question_delete' pk=question.id %}">Delete Question</a>
+{% endif %}
+<form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='up' %}">
+    {% csrf_token %}
+    <button type="submit">Upvote</button>
+</form>
+
+<form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='down' %}">
+    {% csrf_token %}
+    <button type="submit">Downvote</button>
+</form>
+
+<p>Score: {{ question.score }}</p>
+
+<h2>Answers:</h2>
+<ul>
+    {% for answer in question.answers.all %}
+        <li>
+            {{ answer.content }} - by {{ answer.author.username }}
+            {% if answer.author == user %}
+                <a href="{% url 'answer_edit' answer.pk %}">Edit</a> |
+                <a href="{% url 'answer_delete' answer.pk %}">Delete</a>
+            {% endif %}
+            <!-- Voting buttons for the answer -->
+            <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='up' %}">
+                {% csrf_token %}
+                <button type="submit">Upvote</button>
+            </form>
+
+            <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='down' %}">
+                {% csrf_token %}
+                <button type="submit">Downvote</button>
+            </form>
+
+            <p>Score: {{ answer.vote_count }}</p>
+        </li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'answer_create' question.pk %}">Add Answer</a>
+{% endblock %}

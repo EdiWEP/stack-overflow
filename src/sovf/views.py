@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from .forms import QuestionForm, RegistrationForm
-from .models import Question, Answer
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Question, Answer, Vote, AnswerVote
+from django.views.generic import View, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
 from django.urls import reverse_lazy
@@ -48,11 +48,9 @@ class QuestionUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "question_form.html"
 
     def get_success_url(self):
-        # After a successful update, redirect to the question"s detail page
         return reverse_lazy("question_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
-        # Ensure that the user can only edit their own questions
         if form.instance.author != self.request.user:
             raise PermissionError("You are not authorized to edit this question.")
         return super().form_valid(form)
@@ -75,7 +73,6 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        # Redirect to the question detail page after answering
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -96,7 +93,6 @@ class AnswerUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -113,6 +109,36 @@ class AnswerDeleteView(LoginRequiredMixin, DeleteView):
         return answer
 
     def get_success_url(self):
-        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
+
+class VoteOnQuestionView(LoginRequiredMixin, View):
+    def post(self, request, pk, vote_type):
+        question = get_object_or_404(Question, pk=pk)
+
+        vote_value = 1 if vote_type == 'up' else -1
+
+        existing_vote = Vote.objects.filter(user=request.user, question=question).first()
+        if existing_vote:
+            existing_vote.value = vote_value
+            existing_vote.save()
+        else:
+            Vote.objects.create(user=request.user, question=question, value=vote_value)
+
+        return redirect('question_detail', pk=question.pk)
+
+
+class VoteOnAnswerView(LoginRequiredMixin, View):
+    def post(self, request, pk, vote_type):
+        answer = get_object_or_404(Answer, pk=pk)
+
+        vote_value = 1 if vote_type == 'up' else -1
+
+        existing_vote = AnswerVote.objects.filter(user=request.user, answer=answer).first()
+        if existing_vote:
+            existing_vote.value = vote_value
+            existing_vote.save()
+        else:
+            AnswerVote.objects.create(user=request.user, answer=answer, value=vote_value)
+
+        return redirect('question_detail', pk=answer.question.pk)

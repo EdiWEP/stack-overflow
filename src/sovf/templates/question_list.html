@@ -1,10 +1,33 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1>Questions</h1>
-<a href="{% url 'question_create' %}">Ask a Question</a>
-<ul>
+    <h1>Questions</h1>
+
     {% for question in questions %}
-        <li><a href="{% url 'question_detail' question.pk %}">{{ question.title }}</a></li>
+        <div class="question">
+            <h2><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></h2>
+            <p>Asked by: {{ question.author.username }} on {{ question.created_at }}</p>
+        </div>
+    {% empty %}
+        <p>No questions available.</p>
     {% endfor %}
-</ul>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
 {% endblock %}

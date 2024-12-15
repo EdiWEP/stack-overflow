@@ -21,7 +21,10 @@ class QuestionListView(ListView):
     model = Question
     template_name = "question_list.html"
     context_object_name = "questions"
+    paginate_by = 10
 
+    def get_queryset(self):
+        return Question.objects.all().order_by('-created_at')
 
 class QuestionDetailView(DetailView):
     model = Question

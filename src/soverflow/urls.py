@@ -20,5 +20,6 @@ from django.conf.urls import include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("sovf.urls")),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path("", include("sovf.urls")),
 ]

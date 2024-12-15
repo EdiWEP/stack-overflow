@@ -18,6 +18,7 @@ class Question(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="questions")
+    accepted_answer = models.ForeignKey('Answer', null=True, blank=True, on_delete=models.SET_NULL, related_name="accepted_for")
 
     def score(self) -> int:
         """Returns the question's score: upvotes - downvotes"""

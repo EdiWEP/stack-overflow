@@ -40,7 +40,21 @@
                 <button type="submit">Downvote</button>
             </form>
 
-            <p>Score: {{ answer.vote_count }}</p>
+            <p>Score: {{ answer.score }}</p>
+
+            {% if question.accepted_answer == answer %}
+                <p><strong>This is the accepted answer!</strong></p>
+            {% endif %}
+
+            {% if question.author == user %}
+                <!-- Button to accept this answer as the accepted answer -->
+                {% if question.accepted_answer != answer %}
+                    <form method="post" action="{% url 'accept_answer' question_pk=question.pk answer_pk=answer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Accept as Answer</button>
+                    </form>
+                {% endif %}
+            {% endif %}
         </li>
     {% endfor %}
 </ul>

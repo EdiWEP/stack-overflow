@@ -10,6 +10,7 @@ from .views import (
     AnswerDeleteView,
     VoteOnQuestionView,
     VoteOnAnswerView,
+    AcceptAnswerView,
     UserRegistrationView,
 )
 
@@ -25,5 +26,6 @@ urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('question/<int:pk>/vote/<str:vote_type>/', VoteOnQuestionView.as_view(), name='vote_on_question'),
     path('answer/<int:pk>/vote/<str:vote_type>/', VoteOnAnswerView.as_view(), name='vote_on_answer'),
+    path('question/<int:question_pk>/answer/<int:answer_pk>/accept/', AcceptAnswerView.as_view(), name='accept_answer'),
 
 ]

@@ -8,6 +8,7 @@ from .views import (
     AnswerCreateView,
     AnswerUpdateView,
     AnswerDeleteView,
+    UserRegistrationView,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('question/<int:pk>/answer/new/', AnswerCreateView.as_view(), name='answer_create'),
     path('answer/<int:pk>/edit/', AnswerUpdateView.as_view(), name='answer_edit'),
     path('answer/<int:pk>/delete/', AnswerDeleteView.as_view(), name='answer_delete'),
+    path('register/', UserRegistrationView.as_view(), name='register'),
 ]

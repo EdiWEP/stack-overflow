@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
             model_name='question',
             name='accepted_answer',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='accepted_for', to='sovf.answer'),
-        ),
+        ), 
         migrations.AlterField(
             model_name='answervote',
             name='value',

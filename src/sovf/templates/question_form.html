@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>{% if object %}Edit Question{% else %}New Question{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% if object %}Save changes{% else %}Submit Question{% endif %}</button>
+    </form>
+{% endblock %}

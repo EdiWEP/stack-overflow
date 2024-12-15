@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ profile.user.username }}'s Profile</h1>
+
+    <p>
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="Avatar" width="100">
+        {% endif %}
+    </p>
+    <p><strong>Joined:</strong> {{ profile.user.date_joined }}</p>
+    <p><strong>Bio:</strong> {{ profile.bio }}</p>
+
+    {% if profile.user == user %}
+        <a href="{% url 'profile_edit' username=user.username %}">Edit Profile</a>
+    {% endif %}
+
+    <h2>Questions</h2>
+    <ul>
+        {% for question in profile.user.questions.all %}
+            <li><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></li>
+        {% empty %}
+            <li>No questions asked yet.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Answers</h2>
+    <ul>
+        {% for answer in profile.user.answers.all %}
+            <li>{{ answer.content|truncatewords:10 }} - <a href="{% url 'question_detail' answer.question.id %}">View Question</a></li>
+        {% empty %}
+            <li>No answers submitted yet.</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

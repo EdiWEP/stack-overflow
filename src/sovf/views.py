@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect
-from .forms import QuestionForm, RegistrationForm
-from .models import Question, Answer, Vote, AnswerVote
+from .forms import QuestionForm, RegistrationForm, ProfileForm
+from .models import Question, Answer, Vote, AnswerVote, Profile
+from django.core.exceptions import PermissionDenied
 from django.views.generic import View, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import login
+from django.contrib.auth import login, get_user_model
 from django.urls import reverse_lazy
 
 
@@ -24,6 +25,7 @@ class QuestionListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
+        # Retrieve all questions ordered by recency
         return Question.objects.all().order_by('-created_at')
 
 class QuestionDetailView(DetailView):
@@ -42,6 +44,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # After a successful update, redirect to the question"s detail page
         return reverse_lazy("question_detail", kwargs={"pk": self.object.pk})
 
 class QuestionUpdateView(LoginRequiredMixin, UpdateView):
@@ -50,11 +53,13 @@ class QuestionUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "question_form.html"
 
     def get_success_url(self):
+        # After a successful update, redirect to the question"s detail page
         return reverse_lazy("question_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        # Ensure that the user can only edit their own questions
         if form.instance.author != self.request.user:
-            raise PermissionError("You are not authorized to edit this question.")
+            raise PermissionDenied("You are not authorized to edit this question.")
         return super().form_valid(form)
 
 class QuestionDeleteView(LoginRequiredMixin, DeleteView):
@@ -75,6 +80,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # Redirect to the question detail page after answering
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -87,7 +93,7 @@ class AnswerUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         answer = super().get_object(queryset)
         if answer.author != self.request.user:
-            raise PermissionError("You are not authorized to edit this answer.")
+            raise PermissionDenied("You are not authorized to edit this answer.")
         return answer
 
     def form_valid(self, form):
@@ -95,6 +101,7 @@ class AnswerUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -107,10 +114,11 @@ class AnswerDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         answer = super().get_object(queryset)
         if answer.author != self.request.user:
-            raise PermissionError("You are not authorized to delete this answer.")
+            raise PermissionDenied("You are not authorized to delete this answer.")
         return answer
 
     def get_success_url(self):
+        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -118,15 +126,20 @@ class VoteOnQuestionView(LoginRequiredMixin, View):
     def post(self, request, pk, vote_type):
         question = get_object_or_404(Question, pk=pk)
 
+        # Map vote_type to values (upvote or downvote)
         vote_value = 1 if vote_type == 'up' else -1
 
+        # Check if the user has already voted on this question
         existing_vote = Vote.objects.filter(user=request.user, question=question).first()
         if existing_vote:
+            # If vote exists, update it
             existing_vote.value = vote_value
             existing_vote.save()
         else:
+            # If no vote exists, create a new one
             Vote.objects.create(user=request.user, question=question, value=vote_value)
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=question.pk)
 
 
@@ -134,15 +147,20 @@ class VoteOnAnswerView(LoginRequiredMixin, View):
     def post(self, request, pk, vote_type):
         answer = get_object_or_404(Answer, pk=pk)
 
+        # Map vote_type to values (upvote or downvote)
         vote_value = 1 if vote_type == 'up' else -1
 
+        # Check if the user has already voted on this answer
         existing_vote = AnswerVote.objects.filter(user=request.user, answer=answer).first()
         if existing_vote:
+            # If vote exists, update it
             existing_vote.value = vote_value
             existing_vote.save()
         else:
+            # If no vote exists, create a new one
             AnswerVote.objects.create(user=request.user, answer=answer, value=vote_value)
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=answer.question.pk)
 
 
@@ -151,10 +169,46 @@ class AcceptAnswerView(LoginRequiredMixin, View):
         question = get_object_or_404(Question, pk=question_pk)
         answer = get_object_or_404(Answer, pk=answer_pk)
 
+        # Ensure the user is the author of the question
         if question.author != request.user:
-            raise PermissionError("You are not authorized to accept an answer for this question.")
+            raise PermissionDenied("You are not authorized to accept an answer for this question.")
 
+        # Set the accepted answer for the question
         question.accepted_answer = answer
         question.save()
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=question.pk)
+
+
+class ProfileView(DetailView):
+    model = Profile
+    template_name = 'profile_view.html'
+    context_object_name = 'profile'
+
+
+    def get_object(self, queryset=None):
+        # If a username is provided in the URL, get that user's profile
+        username = self.kwargs.get('username', None)
+        if username:
+            user = get_object_or_404(get_user_model(), username=username)
+            return user.profile
+
+        # Otherwise, return the logged-in user's profile
+        return self.request.user.profile
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    form_class = ProfileForm
+    template_name = 'profile_form.html'
+    context_object_name = 'profile'
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if username != self.request.user.username:
+            raise PermissionDenied("You are not authorized to edit this profile.")
+
+        return Profile.objects.get(user=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('my_profile_view')

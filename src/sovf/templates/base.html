@@ -12,6 +12,7 @@
             <a href="{% url 'question_list' %}">Home</a>
             <a href="{% url 'question_create' %}">Create Question</a>
             {% if user.is_authenticated %}
+                <a href="{% url 'my_profile_view' %}">Profile</a>
                 <li>
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}

@@ -6,7 +6,12 @@
     {% for question in questions %}
         <div class="question">
             <h2><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></h2>
-            <p>Asked by: {{ question.author.username }} on {{ question.created_at }}</p>
+            <p>Asked by:
+                <a href="{% url 'profile_view' question.author.username %}">
+                    {{ question.author.username }}
+                </a>
+                on {{ question.created_at }}
+            </p>
         </div>
     {% empty %}
         <p>No questions available.</p>

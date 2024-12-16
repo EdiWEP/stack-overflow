@@ -12,6 +12,8 @@ from .views import (
     VoteOnAnswerView,
     AcceptAnswerView,
     UserRegistrationView,
+    CustomPasswordChangeView,
+    CustomPasswordChangeDoneView,
     ProfileView,
     ProfileUpdateView,
 )
@@ -26,6 +28,8 @@ urlpatterns = [
     path('answer/<int:pk>/edit/', AnswerUpdateView.as_view(), name='answer_edit'),
     path('answer/<int:pk>/delete/', AnswerDeleteView.as_view(), name='answer_delete'),
     path('register/', UserRegistrationView.as_view(), name='register'),
+    path('user/<str:username>/change-password/', CustomPasswordChangeView.as_view(), name='password_change'),
+    path('user/change-password/done/', CustomPasswordChangeDoneView.as_view(), name='password_change_success'),
     path('question/<int:pk>/vote/<str:vote_type>/', VoteOnQuestionView.as_view(), name='vote_on_question'),
     path('answer/<int:pk>/vote/<str:vote_type>/', VoteOnAnswerView.as_view(), name='vote_on_answer'),
     path('question/<int:question_pk>/answer/<int:answer_pk>/accept/', AcceptAnswerView.as_view(), name='accept_answer'),

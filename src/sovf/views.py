@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import QuestionForm, RegistrationForm, ProfileForm
 from .models import Question, Answer, Vote, AnswerVote, Profile
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.views.generic import View, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -209,3 +210,22 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('my_profile_view')
+
+
+class SearchQuestionListView(ListView):
+    model = Question
+    template_name = 'search_results.html'
+    context_object_name = 'questions'
+    paginate_by = 10
+
+    def get_queryset(self):
+        query = self.request.GET.get('query', '')
+        if query:
+            questions = Question.objects.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(answers__content__icontains=query)
+            ).distinct().order_by('-created_at')
+            return questions
+        else:
+            return Question.objects.all().order_by('-created_at')

@@ -16,6 +16,7 @@ from .views import (
     CustomPasswordChangeDoneView,
     ProfileView,
     ProfileUpdateView,
+    SearchQuestionListView,
 )
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='my_profile_view'),
     path('profile/<str:username>/edit/', ProfileUpdateView.as_view(), name='profile_edit'),
     path('profile/<str:username>/', ProfileView.as_view(), name='profile_view'),
+    path('search/', SearchQuestionListView.as_view(), name='search_results'),
 ]

@@ -3,6 +3,11 @@
 {% block content %}
     <h1>Questions</h1>
 
+    <form method="get" action="{% url 'search_results' %}">
+        <input type="text" name="query" placeholder="Search">
+        <button type="submit">Search</button>
+    </form>
+
     {% for question in questions %}
         <div class="question">
             <h2><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></h2>

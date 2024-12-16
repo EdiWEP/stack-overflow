@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Search Results</h1>
+
+    <form method="get" action="{% url 'search_results' %}">
+        <input type="text" name="query" placeholder="Search" value="{{ request.GET.query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if questions %}
+        <ul>
+            {% for question in questions %}
+                <li>
+                    <h2><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></h2>
+                    <p>{{ question.content|truncatewords:50 }}</p>
+                    <p>Asked by:
+                        <a href="{% url 'profile_view' question.author.username %}">
+                            {{ question.author.username }}
+                        </a>
+                        on {{ question.created_at }}
+                    </p>                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% else %}
+        <p>No results found for "{{ request.GET.query }}".</p>
+    {% endif %}
+{% endblock %}

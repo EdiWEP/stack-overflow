@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Answer, Vote, AnswerVote, AnswerComment, AnswerCommentVote
+from .models import Question, Answer, Vote, AnswerVote, AnswerComment, AnswerCommentVote, Badge, UserBadge
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -24,3 +24,11 @@ class AnswerVoteAdmin(admin.ModelAdmin):
 @admin.register(AnswerCommentVote)
 class AnswerCommentVoteAdmin(admin.ModelAdmin):
     list_display = ("user", "comment", "value", "created_at")
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "badge_type", "threshold", "image")
+
+@admin.register(UserBadge)
+class UserBadgeAdmin(admin.ModelAdmin):
+    list_display = ("user", "badge", "awarded_at")

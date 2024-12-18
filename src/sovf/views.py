@@ -253,6 +253,7 @@ class AcceptAnswerView(LoginRequiredMixin, View):
         # Set the accepted answer for the question
         question.accepted_answer = answer
         question.save()
+        answer.save()
 
         # Redirect to the question detail page
         return redirect('question_detail', pk=question.pk)

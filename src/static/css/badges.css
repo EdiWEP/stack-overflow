@@ -1,0 +1,7 @@
+img.badge {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    max-width: 50px;
+    max-height: 50px;
+}

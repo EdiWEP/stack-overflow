@@ -21,6 +21,9 @@
 <p>Score: {{ question.score }}</p>
 
 <h2>Answers:</h2>
+
+<a href="{% url 'answer_create' question.pk %}">Add Answer</a>
+
 <ul>
     {% for answer in question.answers.all %}
         <li>
@@ -29,7 +32,7 @@
                 <a href="{% url 'answer_edit' answer.pk %}">Edit</a> |
                 <a href="{% url 'answer_delete' answer.pk %}">Delete</a>
             {% endif %}
-            <!-- Voting buttons for the answer -->
+
             <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='up' %}">
                 {% csrf_token %}
                 <button type="submit">Upvote</button>
@@ -47,7 +50,7 @@
             {% endif %}
 
             {% if question.author == user %}
-                <!-- Button to accept this answer as the accepted answer -->
+
                 {% if question.accepted_answer != answer %}
                     <form method="post" action="{% url 'accept_answer' question_pk=question.pk answer_pk=answer.pk %}">
                         {% csrf_token %}
@@ -55,9 +58,41 @@
                     </form>
                 {% endif %}
             {% endif %}
+
+
+            <h3>Comments:</h3>
+
+            <a href="{% url 'comment_create' pk=answer.pk %}">Add Comment</a>
+
+            <ul>
+                {% for comment in answer.comments.all %}
+                    <li>
+                        {{ comment.content }} - by {{ comment.author.username }}
+                        {% if comment.author == user %}
+                            <a href="{% url 'comment_edit' pk=comment.pk %}">Edit</a> |
+                            <a href="{% url 'comment_delete' pk=comment.pk %}">Delete</a>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='up' %}">
+                            {% csrf_token %}
+                            <button type="submit">Upvote</button>
+                        </form>
+
+                        <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='down' %}">
+                            {% csrf_token %}
+                            <button type="submit">Downvote</button>
+                        </form>
+                        <p>Score: {{ comment.score }}</p>
+                    </li>
+                {% empty %}
+                    <p>No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </ul>
+
         </li>
+
+        <br>
     {% endfor %}
 </ul>
 
-<a href="{% url 'answer_create' question.pk %}">Add Answer</a>
 {% endblock %}

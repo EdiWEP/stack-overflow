@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import QuestionForm, RegistrationForm, ProfileForm
-from .models import Question, Answer, Vote, AnswerVote, Profile
+from .models import Question, Answer, Vote, AnswerVote, Profile, AnswerComment, AnswerCommentVote
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.views.generic import View, ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -26,6 +26,7 @@ class CustomPasswordChangeView(PasswordChangeView):
     success_url = reverse_lazy('password_change_success')
 
     def dispatch(self, request, *args, **kwargs):
+        # Ensure that the logged-in user can only access password change URL for their own username
         if request.user.username != self.kwargs['username']:
             raise PermissionDenied("You are not authorized to edit another user's password")
 
@@ -45,6 +46,7 @@ class QuestionListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
+        # Retrieve all questions ordered by recency
         return Question.objects.all().order_by('-created_at')
 
 class QuestionDetailView(DetailView):
@@ -63,6 +65,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # After a successful update, redirect to the question"s detail page
         return reverse_lazy("question_detail", kwargs={"pk": self.object.pk})
 
 class QuestionUpdateView(LoginRequiredMixin, UpdateView):
@@ -71,9 +74,11 @@ class QuestionUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "question_form.html"
 
     def get_success_url(self):
+        # After a successful update, redirect to the question"s detail page
         return reverse_lazy("question_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        # Ensure that the user can only edit their own questions
         if form.instance.author != self.request.user:
             raise PermissionDenied("You are not authorized to edit this question.")
         return super().form_valid(form)
@@ -96,6 +101,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # Redirect to the question detail page after answering
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -116,6 +122,7 @@ class AnswerUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
 
@@ -132,22 +139,84 @@ class AnswerDeleteView(LoginRequiredMixin, DeleteView):
         return answer
 
     def get_success_url(self):
+        # Redirect to the question detail page after editting
         question_id = self.object.question.id
         return reverse_lazy("question_detail", kwargs={"pk": question_id})
+
+
+class AnswerCommentCreateView(LoginRequiredMixin, CreateView):
+    model = AnswerComment
+    template_name = "comment_form.html"
+    fields = ["content"]
+
+    def form_valid(self, form):
+        answer = get_object_or_404(Answer, pk=self.kwargs["pk"])
+        form.instance.author = self.request.user
+        form.instance.answer = answer
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirect to the question detail page after creating a comment
+        question_id = self.object.answer.question.id
+        return reverse_lazy("question_detail", kwargs={"pk": question_id})
+
+
+class AnswerCommentUpdateView(LoginRequiredMixin, UpdateView):
+    model = AnswerComment
+    template_name = "comment_form.html"
+    fields = ["content"]
+
+    def get_object(self, queryset=None):
+        comment = super().get_object(queryset)
+        if comment.author != self.request.user:
+            raise PermissionDenied("You are not authorized to edit this comment.")
+        return comment
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirect to the question detail page after editing a comment
+        question_id = self.object.answer.question.id
+        return reverse_lazy("question_detail", kwargs={"pk": question_id})
+
+
+class AnswerCommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = AnswerComment
+    template_name = "comment_confirm_delete.html"
+    context_object_name = "comment"
+
+    def get_object(self, queryset=None):
+        comment = super().get_object(queryset)
+        if comment.author != self.request.user:
+            raise PermissionDenied("You are not authorized to delete this comment.")
+        return comment
+
+    def get_success_url(self):
+        # Redirect to the question detail page after deleting a comment
+        question_id = self.object.answer.question.id
+        return reverse_lazy("question_detail", kwargs={"pk": question_id})
+
 
 class VoteOnQuestionView(LoginRequiredMixin, View):
     def post(self, request, pk, vote_type):
         question = get_object_or_404(Question, pk=pk)
 
+        # Map vote_type to values (upvote or downvote)
         vote_value = 1 if vote_type == 'up' else -1
 
+        # Check if the user has already voted on this question
         existing_vote = Vote.objects.filter(user=request.user, question=question).first()
         if existing_vote:
+            # If vote exists, update it
             existing_vote.value = vote_value
             existing_vote.save()
         else:
+            # If no vote exists, create a new one
             Vote.objects.create(user=request.user, question=question, value=vote_value)
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=question.pk)
 
 
@@ -155,15 +224,20 @@ class VoteOnAnswerView(LoginRequiredMixin, View):
     def post(self, request, pk, vote_type):
         answer = get_object_or_404(Answer, pk=pk)
 
+        # Map vote_type to values (upvote or downvote)
         vote_value = 1 if vote_type == 'up' else -1
 
+        # Check if the user has already voted on this answer
         existing_vote = AnswerVote.objects.filter(user=request.user, answer=answer).first()
         if existing_vote:
+            # If vote exists, update it
             existing_vote.value = vote_value
             existing_vote.save()
         else:
+            # If no vote exists, create a new one
             AnswerVote.objects.create(user=request.user, answer=answer, value=vote_value)
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=answer.question.pk)
 
 
@@ -172,13 +246,37 @@ class AcceptAnswerView(LoginRequiredMixin, View):
         question = get_object_or_404(Question, pk=question_pk)
         answer = get_object_or_404(Answer, pk=answer_pk)
 
+        # Ensure the user is the author of the question
         if question.author != request.user:
             raise PermissionDenied("You are not authorized to accept an answer for this question.")
 
+        # Set the accepted answer for the question
         question.accepted_answer = answer
         question.save()
 
+        # Redirect to the question detail page
         return redirect('question_detail', pk=question.pk)
+
+
+class VoteOnAnswerCommentView(LoginRequiredMixin, View):
+    def post(self, request, pk, vote_type):
+        comment = get_object_or_404(AnswerComment, pk=pk)
+
+        # Map vote_type to values (upvote or downvote)
+        vote_value = 1 if vote_type == 'up' else -1
+
+        # Check if the user has already voted on this comment
+        existing_vote = AnswerCommentVote.objects.filter(user=request.user, comment=comment).first()
+        if existing_vote:
+            # If vote exists, update it
+            existing_vote.value = vote_value
+            existing_vote.save()
+        else:
+            # If no vote exists, create a new one
+            AnswerCommentVote.objects.create(user=request.user, comment=comment, value=vote_value)
+
+        # Redirect to the question detail page
+        return redirect('question_detail', pk=comment.answer.question.pk)
 
 
 class ProfileView(DetailView):
@@ -188,11 +286,13 @@ class ProfileView(DetailView):
 
 
     def get_object(self, queryset=None):
+        # If a username is provided in the URL, get that user's profile
         username = self.kwargs.get('username', None)
         if username:
             user = get_object_or_404(get_user_model(), username=username)
             return user.profile
 
+        # Otherwise, return the logged-in user's profile
         return self.request.user.profile
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):

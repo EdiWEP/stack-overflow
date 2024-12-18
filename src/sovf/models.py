@@ -85,6 +85,43 @@ class AnswerVote(models.Model):
     class Meta:
         unique_together = ('user', 'answer')
 
+class AnswerComment(models.Model):
+    answer = models.ForeignKey(
+        Answer,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='answer_comments',
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def score(self):
+        """Returns the comment's score: upvotes - downvotes"""
+        upvotes = self.votes.filter(value=UPVOTE).count()
+        downvotes = self.votes.filter(value=DOWNVOTE).count()
+        return upvotes - downvotes
+
+class AnswerCommentVote(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='answer_comment_votes',
+    )
+    comment = models.ForeignKey(
+        AnswerComment,
+        on_delete=models.CASCADE,
+        related_name='votes',
+    )
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'comment')
 
 
 class Profile(models.Model):
@@ -92,11 +129,13 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
+# Signal handler to create a profile when a new user is created
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
+# Signal handler to save the profile when the user is updated
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()

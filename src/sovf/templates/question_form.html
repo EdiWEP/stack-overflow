@@ -1,11 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{% if object %}Edit Question{% else %}New Question{% endif %}</h2>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="text-center mb-4">{% if object %}Edit Question{% else %}New Question{% endif %}</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">{% if object %}Save changes{% else %}Submit Question{% endif %}</button>
-    </form>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}
+
+                <!-- Title field with Bootstrap form-control, centered and same width as content -->
+                <div class="form-group">
+                    <div class="d-flex justify-content-center">
+                        <div class="w-75">
+                            <input type="text" name="title" value="{{ form.title.value }}" class="form-control" id="{{ form.title.id_for_label }}" placeholder="Enter your question title">
+                        </div>
+                    </div>
+                    {% for error in form.title.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                </br></br>
+
+                <!-- Loop through the fields except title -->
+                {% for field in form %}
+                    {% if field.name != "title" %}
+                    <div class="form-group">
+                        <!-- Center the CKEditor using Bootstrap utilities -->
+                        {% if field.name == "content" %}
+                            <div class="d-flex justify-content-center">
+                                <div class="w-75">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Submit button with same width as content field -->
+                <div class="d-flex justify-content-center mt-4">
+                    <div class="w-75">
+                        <button type="submit" class="btn btn-primary w-100">
+                            {% if object %}Save changes{% else %}Submit Question{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

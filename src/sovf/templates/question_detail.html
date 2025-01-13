@@ -1,98 +1,127 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ question.title }}</h1>
-<p>{{ question.content }}</p>
-<p>Author: {{ question.author.username }}</p>
-{% if question.author == user %}
-    <a href="{% url 'question_edit' pk=question.id %}">Edit Question</a>
-    <a href="{% url 'question_delete' pk=question.id %}">Delete Question</a>
-{% endif %}
-<form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='up' %}">
-    {% csrf_token %}
-    <button type="submit">Upvote</button>
-</form>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h1>{{ question.title }}</h1>
+            <div>{{ question.content|safe }}</div>
 
-<form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='down' %}">
-    {% csrf_token %}
-    <button type="submit">Downvote</button>
-</form>
-
-<p>Score: {{ question.score }}</p>
-
-<h2>Answers:</h2>
-
-<a href="{% url 'answer_create' question.pk %}">Add Answer</a>
-
-<ul>
-    {% for answer in question.answers.all %}
-        <li>
-            {{ answer.content }} - by {{ answer.author.username }}
-            {% if answer.author == user %}
-                <a href="{% url 'answer_edit' answer.pk %}">Edit</a> |
-                <a href="{% url 'answer_delete' answer.pk %}">Delete</a>
-            {% endif %}
-
-            <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='up' %}">
-                {% csrf_token %}
-                <button type="submit">Upvote</button>
-            </form>
-
-            <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='down' %}">
-                {% csrf_token %}
-                <button type="submit">Downvote</button>
-            </form>
-
-            <p>Score: {{ answer.score }}</p>
-
-            {% if question.accepted_answer == answer %}
-                <p><strong>This is the accepted answer!</strong></p>
-            {% endif %}
+            <p><a href="{% url 'profile_view' question.author.username %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View profile of {{ question.author.username }}">
+                <strong>{{ question.author.username }}</strong>
+            </a></p>
 
             {% if question.author == user %}
-
-                {% if question.accepted_answer != answer %}
-                    <form method="post" action="{% url 'accept_answer' question_pk=question.pk answer_pk=answer.pk %}">
-                        {% csrf_token %}
-                        <button type="submit">Accept as Answer</button>
-                    </form>
-                {% endif %}
+                <div class="d-flex gap-3 mb-4">
+                    <a href="{% url 'question_edit' pk=question.id %}" class="btn btn-warning">Edit Question</a>
+                    <a href="{% url 'question_delete' pk=question.id %}" class="btn btn-danger">Delete Question</a>
+                </div>
             {% endif %}
 
+            <form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='up' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-arrow-up-circle"></i> <!-- Upvote icon -->
+                </button>
+            </form>
 
-            <h3>Comments:</h3>
+            <form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='down' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-arrow-down-circle"></i> <!-- Downvote icon -->
+                </button>
+            </form>
 
-            <a href="{% url 'comment_create' pk=answer.pk %}">Add Comment</a>
+            <p class="mt-3"><strong>Score:</strong> {{ question.score }}</p>
 
-            <ul>
-                {% for comment in answer.comments.all %}
-                    <li>
-                        {{ comment.content }} - by {{ comment.author.username }}
-                        {% if comment.author == user %}
-                            <a href="{% url 'comment_edit' pk=comment.pk %}">Edit</a> |
-                            <a href="{% url 'comment_delete' pk=comment.pk %}">Delete</a>
+            <h2 class="mt-4">Answers:</h2>
+            <a href="{% url 'answer_create' question.pk %}" class="btn btn-primary mb-3">Add Answer</a>
+
+            <ul class="list-group">
+                {% for answer in question.answers.all %}
+                    <li class="list-group-item">
+                        {{ answer.content|safe }} - <a href="{% url 'profile_view' question.author.username %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View profile of {{ question.author.username }}">
+                            <strong>{{ question.author.username }}</strong>
+                        </a>
+
+                        {% if answer.author == user %}
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="{% url 'answer_edit' answer.pk %}" class="btn btn-warning btn-sm">Edit</a> |
+                                <a href="{% url 'answer_delete' answer.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                            </div>
                         {% endif %}
 
-                        <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='up' %}">
+                        <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='up' %}" class="d-inline-block mt-2">
                             {% csrf_token %}
-                            <button type="submit">Upvote</button>
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-arrow-up-circle"></i> <!-- Upvote icon -->
+                            </button>
                         </form>
 
-                        <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='down' %}">
+                        <form method="post" action="{% url 'vote_on_answer' pk=answer.pk vote_type='down' %}" class="d-inline-block mt-2">
                             {% csrf_token %}
-                            <button type="submit">Downvote</button>
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-arrow-down-circle"></i> <!-- Downvote icon -->
+                            </button>
                         </form>
-                        <p>Score: {{ comment.score }}</p>
+
+                        <p class="mt-2"><strong>Score:</strong> {{ answer.score }}</p>
+
+                        {% if question.accepted_answer == answer %}
+                            <p class="text-success"><strong>This is the accepted answer!</strong></p>
+                        {% endif %}
+
+                        {% if question.author == user %}
+                            {% if question.accepted_answer != answer %}
+                                <form method="post" action="{% url 'accept_answer' question_pk=question.pk answer_pk=answer.pk %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm">Accept as Answer</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+
+                        <h3 class="mt-3">Comments:</h3>
+
+                        <a href="{% url 'comment_create' pk=answer.pk %}" class="btn btn-secondary mb-3">Add Comment</a>
+
+                        <ul class="list-group">
+                            {% for comment in answer.comments.all %}
+                                <li class="list-group-item">
+                                    {{ comment.content|safe }} - <strong>by {{ comment.author.username }}</strong>
+
+                                    {% if comment.author == user %}
+                                        <div class="d-flex gap-2 mt-2">
+                                            <a href="{% url 'comment_edit' pk=comment.pk %}" class="btn btn-warning btn-sm">Edit</a> |
+                                            <a href="{% url 'comment_delete' pk=comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                        </div>
+                                    {% endif %}
+
+                                    <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='up' %}" class="d-inline-block mt-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-arrow-up-circle"></i> <!-- Upvote icon -->
+                                        </button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'vote_on_comment' pk=comment.pk vote_type='down' %}" class="d-inline-block mt-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="bi bi-arrow-down-circle"></i> <!-- Downvote icon -->
+                                        </button>
+                                    </form>
+
+                                    <p class="mt-2"><strong>Score:</strong> {{ comment.score }}</p>
+                                </li>
+                            {% empty %}
+                                <p>No comments yet. Be the first to comment!</p>
+                            {% endfor %}
+                        </ul>
                     </li>
                 {% empty %}
-                    <p>No comments yet. Be the first to comment!</p>
+                    <li class="list-group-item">No answers yet. Be the first to answer!</li>
                 {% endfor %}
             </ul>
-
-        </li>
-
-        <br>
-    {% endfor %}
-</ul>
-
+        </div>
+    </div>
+</div>
 {% endblock %}

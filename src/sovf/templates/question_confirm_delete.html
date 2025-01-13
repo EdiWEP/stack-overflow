@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Delete Question</h1>
-<p>Are you sure you want to delete "{{ object.title }}"?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Confirm</button>
-</form>
-<a href="{% url 'question_detail' object.pk %}">Cancel</a>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h1 class="text-danger text-center">Delete Question</h1>
+            <p class="text-center">Are you sure you want to delete "<strong>{{ object.title }}</strong>"?</p>
+            <div class="d-flex justify-content-center mt-4">
+                <form method="post" class="me-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                <a href="{% url 'question_detail' object.pk %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

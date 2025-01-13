@@ -1,13 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Register</h2>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Register</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
+        <form method="post" class="p-4 border rounded shadow-sm bg-light">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="font-weight-bold">Username</label>
+                <input type="text" name="username" value="{{ form.username.value }}" class="form-control" id="{{ form.username.id_for_label }}">
+                {% for error in form.username.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
 
-    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}" class="font-weight-bold">Email</label>
+                <input type="email" name="email" value="{{ form.email.value }}" class="form-control" id="{{ form.email.id_for_label }}">
+                {% for error in form.email.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}" class="font-weight-bold">Password</label>
+                <input type="password" name="password1" value="{{ form.password1.value }}" class="form-control" id="{{ form.password1.id_for_label }}">
+                {% for error in form.password1.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}" class="font-weight-bold">Confirm Password</label>
+                <input type="password" name="password2" value="{{ form.password2.value }}" class="form-control" id="{{ form.password2.id_for_label }}">
+                {% for error in form.password2.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+        </form>
+
+        <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
 {% endblock %}

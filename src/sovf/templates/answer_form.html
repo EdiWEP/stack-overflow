@@ -1,10 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% if answer %}Edit{% else %}Add{% endif %} Answer</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if object %}Save changes{% else %}Submit Answer{% endif %}</button>
-</form>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="text-center mb-4">
+                {% if answer %}Edit Answer{% else %}New Answer{% endif %}
+            </h2>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}  <!-- Media for CKEditor -->
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <!-- For the content field (CKEditor), center it and set the width to 75% -->
+                        {% if field.name == "content" %}
+                            <div class="d-flex justify-content-center">
+                                <div class="w-75">
+                                    {{ field }}  <!-- Display CKEditor here -->
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- For other fields, display them normally but wrapped in a centered container -->
+                            <div class="d-flex justify-content-center">
+                                <div class="w-75">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <!-- Submit button with same width as the content field -->
+                <div class="d-flex justify-content-center mt-4">
+                    <div class="w-75">
+                        <button type="submit" class="btn btn-primary w-100">
+                            {% if answer %}Save changes{% else %}Submit Answer{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 {% endblock %}

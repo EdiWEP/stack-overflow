@@ -3,6 +3,8 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
+from ckeditor_uploader.fields import RichTextUploadingField
 from .badges import check_for_badge_awards
 
 UPVOTE = 1
@@ -17,7 +19,7 @@ VOTE_CHOICES = [
 class Question(models.Model):
 
     title = models.CharField(max_length=200)
-    content = models.TextField(max_length=10000)
+    content = RichTextUploadingField(max_length=10000)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="questions")
@@ -54,7 +56,7 @@ class Answer(models.Model):
         on_delete=models.CASCADE,
         related_name="answers",
     )
-    content = models.TextField()
+    content = RichTextUploadingField()
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -98,7 +100,7 @@ class AnswerComment(models.Model):
         on_delete=models.CASCADE,
         related_name="answer_comments",
     )
-    content = models.TextField()
+    content = RichTextUploadingField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

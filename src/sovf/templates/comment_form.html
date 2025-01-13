@@ -1,10 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% if object %}Edit{% else %}Add{% endif %} Comment</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if object %}Save changes{% else %}Submit Comment{% endif %}</button>
-</form>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h1 class="text-center">
+                {% if object %}Edit{% else %}Add{% endif %} Comment
+            </h1>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}  <!-- Media for CKEditor -->
+                {% for field in form %}
+                    <div class="form-group">
+                        
+                        {{ field }}  <!-- Display the field (CKEditor widget will appear here for 'content') -->
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary w-100 mt-4">
+                        {% if object %}Save changes{% else %}Submit Comment{% endif %}
+                    </button>
+                </div>
+            </form>
+
+            
+        </div>
+    </div>
+</div>
 {% endblock %}

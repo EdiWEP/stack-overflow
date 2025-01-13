@@ -1,46 +1,53 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Search Results</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">Search Results</h1>
 
-    <form method="get" action="{% url 'search_results' %}">
-        <input type="text" name="query" placeholder="Search" value="{{ request.GET.query }}">
-        <button type="submit">Search</button>
+    <form method="get" action="{% url 'search_results' %}" class="mb-4 d-flex">
+        <input type="text" name="query" placeholder="Search" value="{{ request.GET.query }}" class="form-control me-2" aria-label="Search">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
     </form>
 
     {% if questions %}
-        <ul>
+        <ul class="list-unstyled">
             {% for question in questions %}
-                <li>
-                    <h2><a href="{% url 'question_detail' question.id %}">{{ question.title }}</a></h2>
-                    <p>{{ question.content|truncatewords:50 }}</p>
-                    <p>Asked by:
-                        <a href="{% url 'profile_view' question.author.username %}">
-                            {{ question.author.username }}
-                        </a>
-                        on {{ question.created_at }}
-                    </p>                </li>
+                <li class="mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title"><a href="{% url 'question_detail' question.id %}" class="text-decoration-none">{{ question.title }}</a></h2>
+                            <p class="card-text">{{ question.content|striptags|truncatewords:50 }}</p>
+                            <p class="card-text">
+                                Asked by: <a href="{% url 'profile_view' question.author.username %}">{{ question.author.username }}</a>
+                                on {{ question.created_at|date:"F d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                </li>
             {% endfor %}
         </ul>
 
-        <div class="pagination">
+        <div class="d-flex justify-content-between mt-4">
             <span class="step-links">
                 {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    <a href="?page=1" class="btn btn-outline-secondary btn-sm">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-secondary btn-sm">Previous</a>
                 {% endif %}
+            </span>
 
-                <span class="current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            <span class="step-links">
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-secondary btn-sm">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-secondary btn-sm">Last &raquo;</a>
                 {% endif %}
             </span>
         </div>
     {% else %}
         <p>No results found for "{{ request.GET.query }}".</p>
     {% endif %}
+</div>
 {% endblock %}

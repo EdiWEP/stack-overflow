@@ -1,6 +1,32 @@
+import subprocess
+import os
+import re
+
+from tempfile import NamedTemporaryFile
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.http import HttpResponseBadRequest, JsonResponse
+
+class CompilationFailed(Exception):
+    """Raised when the submitted code has a compilation error"""
+
+    def __init__(self, stdout: str, stderr: str):
+        super().__init__()
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+class ExecutionFailed(Exception):
+    """Raised when the submitted code has a runtime error"""
+    def __init__(self, stdout: str, stderr: str):
+        super().__init__()
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+class InvalidJavaCode(Exception):
+    """Raised when the submitted java code is invalid"""
+
 
 class CodeRunView(LoginRequiredMixin, View):
     """View for handling code run operations"""
@@ -21,18 +47,119 @@ class CodeRunView(LoginRequiredMixin, View):
 
         code = request.body.decode("utf-8")
 
-        stdout, stderr = code_runner_func(code)
+        try:
+            stdout, stderr = code_runner_func(code)
+        except CompilationFailed as exc:
+            return JsonResponse(data={"stdout": exc.stdout, "stderr": exc.stderr, "message": "Code resulted in compilation error"})
+        except ExecutionFailed as exc:
+            return JsonResponse(data={"stdout": exc.stdout, "stderr": exc.stderr, "message": "Code execution encountered runtime error"})
+        except InvalidJavaCode as exc:
+            return JsonResponse(data={"stdout": "", "stderr": "", "message": "Only java programs with a single top level class can be run"})
 
-        return JsonResponse(data={"stdout": stdout, "stderr": stderr})
+        return JsonResponse(data={"stdout": stdout, "stderr": stderr, "message": "Code run was successful"})
 
     def _run_python(self, code) -> tuple[str, str]:
-        """Runs python code and returns stdout and stderr"""
-        pass
+        """Runs Python code and returns stdout and stderr"""
+        with NamedTemporaryFile(suffix=".py", delete=False, mode="w") as temp_file:
+            temp_file_name = temp_file.name
+            temp_file.write(code)
+            temp_file.flush()
+
+        try:
+            result = subprocess.run(
+                ["python", temp_file.name],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+
+            if result.returncode != 0:
+                raise ExecutionFailed(result.stdout, result.stderr)
+
+            return result.stdout, result.stderr
+        finally:
+            self.__remove_file(temp_file_name)
 
     def _run_cpp(self, code) -> tuple[str, str]:
-        """Runs c++ code and returns stdout and stderr"""
-        pass
+        """Runs C++ code and returns stdout and stderr"""
+        with NamedTemporaryFile(suffix=".cpp", delete=False, mode="w") as temp_file:
+            temp_file_name = temp_file.name
+            temp_file.write(code)
+            temp_file.flush()
+
+        try:
+            binary_name = temp_file_name.replace(".cpp", ".exe")
+
+            compile_result = subprocess.run(
+                ["g++", temp_file_name, "-o", binary_name],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+
+            if compile_result.returncode != 0:
+                raise CompilationFailed(compile_result.stdout, compile_result.stderr)
+
+            result = subprocess.run(
+                [binary_name],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+
+            if result.returncode != 0:
+                raise ExecutionFailed(result.stdout, result.stderr)
+        finally:
+            self.__remove_file(temp_file_name)
+
+        return result.stdout, result.stderr
 
     def _run_java(self, code) -> tuple[str, str]:
-        """Runs java code and returns stdout and stderr"""
-        pass
+        """Runs Java code and returns stdout and stderr"""
+
+        def extract_class_name(code: str) -> str:
+            """Extracts the java class name from the code
+            Each java program should only have one top level class"""
+
+            match = re.search(r'class\s+(\w+)', code)
+            if match:
+                return match.group(1)
+            else:
+                raise InvalidJavaCode
+
+        with NamedTemporaryFile(suffix=".java", delete=False, mode="w") as temp_file:
+            temp_file_name= temp_file.name
+            temp_file.write(code)
+            temp_file.flush()
+
+        try:
+            class_name = extract_class_name(code)
+
+            compile_result = subprocess.run(
+                ["javac", temp_file_name],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+
+            if compile_result.returncode != 0:
+                raise CompilationFailed(compile_result.stdout, compile_result.stderr)
+
+            result = subprocess.run(
+                ["java", "-cp", temp_file.name.rsplit("\\", 1)[0], class_name],
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+
+            if result.returncode != 0:
+                raise ExecutionFailed(result.stdout, result.stderr)
+        finally:
+            self.__remove_file(temp_file_name)
+
+        return result.stdout, result.stderr
+
+    def __remove_file(self, file_name: str):
+        if os.path.exists(file_name):
+            os.remove(file_name)
+            pass

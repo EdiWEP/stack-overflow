@@ -9,14 +9,14 @@ ${logout_url}           http://127.0.0.1:8000/accounts/logout/
 ${username_field}       id=id_username
 ${password_field}       id=id_password
 
-${username}         admin
-${password}         admin
+${username}         robot
+${password}         Selenium123?
 
 
 *** Keywords ***
 Open Chrome
     ${firefox_options}=    Evaluate    sys.modules['selenium.webdriver'].FirefoxOptions()    sys, selenium.webdriver
-    Call Method    ${firefox_options}    add_argument    --headless
+    # Call Method    ${firefox_options}    add_argument    --headless
     Open Browser    ${login_url}    Firefox    options=${firefox_options}
     Set Window Size    1920    1080
 

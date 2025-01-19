@@ -26,8 +26,9 @@ handler403 = custom_permission_denied_view
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("sovf.urls")),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("ckeditor/", include("ckeditor_uploader.urls")),
+    path("", include("runner.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

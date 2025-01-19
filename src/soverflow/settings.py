@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'widget_tweaks',
     "sovf",
+    "runner",
 ]
 
 MIDDLEWARE = [
@@ -134,12 +135,12 @@ LOGOUT_REDIRECT_URL = '/'
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_IMAGE_BACKEND = "pillow"
-CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js' 
+CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'
 CKEDITOR_CONFIGS = {
     'default':
         {
             'toolbar': 'full',
             'width': 'auto',
-            
+
         },
 }

@@ -13,7 +13,7 @@
                 {% endif %}
             </div>
             <p><strong>Joined:</strong> {{ profile.user.date_joined }}</p>
-            <p><strong>Bio:</strong> {{ profile.bio|safe }}</p>
+            <p><strong>Bio:</strong> {{ profile.bio|default:'' }}</p>
 
             {% if profile.user == user %}
             <div class="d-flex justify-content-center mb-4">

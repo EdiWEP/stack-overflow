@@ -1,0 +1,19 @@
+<!-- Sidebar (Offcanvas) -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h5 id="sidebarLabel">Code Editor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <!-- Language Selector -->
+        <select id="language-select" class="form-select mb-3">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="clike">C++</option>
+        </select>
+        <!-- Code Editor -->
+        <textarea id="code-editor" class="form-control"></textarea>
+        <button class="btn btn-success w-100 mt-3" id="run-code">Run Code</button>
+        <div id="output-container" class="border p-3 bg-light mt-3" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+</div>

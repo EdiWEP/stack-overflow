@@ -330,3 +330,8 @@ class SearchQuestionListView(ListView):
             return questions
         else:
             return Question.objects.all().order_by('-created_at')
+        
+
+
+def example_page(request):
+    return render(request, "example_page.html")

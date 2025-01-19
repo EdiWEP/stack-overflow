@@ -163,3 +163,8 @@ cython_debug/
 
 # Ignore media files except the defaults
 media/*
+# Ignore robot results files
+*screenshot*.png
+log.html
+report.html
+output.xml

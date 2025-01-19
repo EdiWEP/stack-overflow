@@ -14,7 +14,7 @@
                 <div class="form-group">
                     <div class="d-flex justify-content-center">
                         <div class="w-75">
-                            <input type="text" name="title" value="{{ form.title.value }}" class="form-control" id="{{ form.title.id_for_label }}" placeholder="Enter your question title">
+                            <input type="text" name="title" value="{{form.title.value|default:''}}" class="form-control" id="{{ form.title.id_for_label }}" placeholder="Enter your question title">
                         </div>
                     </div>
                     {% for error in form.title.errors %}

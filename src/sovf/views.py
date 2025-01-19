@@ -1,3 +1,4 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import QuestionForm, RegistrationForm, ProfileForm
 from .models import Question, Answer, Vote, AnswerVote, Profile, AnswerComment, AnswerCommentVote
@@ -87,6 +88,15 @@ class QuestionDeleteView(LoginRequiredMixin, DeleteView):
     model = Question
     template_name = "question_confirm_delete.html"
     success_url = reverse_lazy("question_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        question = self.get_object()
+
+        if question.author != request.user:
+            return HttpResponseForbidden("You can not delete this question")
+
+        return super().dispatch(request, *args, **kwargs)
+
 
 
 class AnswerCreateView(LoginRequiredMixin, CreateView):

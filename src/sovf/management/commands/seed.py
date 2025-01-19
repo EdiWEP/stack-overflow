@@ -7,6 +7,11 @@ from sovf.models import Question, Answer, AnswerComment, Vote, AnswerVote
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
+        # create user for Robot acceptance tests
+        User.objects.create_user(username="robot", password="Selenium123?")
+        # create admin user
+        User.objects.create_superuser(username="admin", password="admin")
+
         usernames = ['andrei', 'bianca', 'carina', 'david', 'evelina']
         users = []
         for username in usernames:

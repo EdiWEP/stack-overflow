@@ -29,7 +29,7 @@
                                 <a class="nav-link text-white" href="{% url 'question_list' %}">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="{% url 'question_create' %}">Create Question</a>
+                                <a class="nav-link text-white" id="create_question_nav" href="{% url 'question_create' %}">Create Question</a>
                             </li>
                             {% if user.is_authenticated %}
                             <li class="nav-item">
@@ -55,7 +55,7 @@
             </nav>
         </div>
     </header>
-    
+
     <main class="container mt-4">
         {% block content %}
         {% endblock %}

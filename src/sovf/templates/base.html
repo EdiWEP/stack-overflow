@@ -30,7 +30,7 @@
                                 <a class="nav-link text-white" href="{% url 'question_list' %}">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="{% url 'question_create' %}">Create Question</a>
+                                <a class="nav-link text-white" id="create_question_nav" href="{% url 'question_create' %}">Create Question</a>
                             </li>
                             {% if user.is_authenticated %}
                             <li class="nav-item">
@@ -60,6 +60,7 @@
         </div>
     </header>
 
+<<<<<<< HEAD
     {% block sidebar %}
         {% include  'sidebar.html' %}
     {% endblock %}
@@ -75,6 +76,12 @@
     </div>
 
     <!-- Footer -->
+=======
+    <main class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+>>>>>>> 361eef695860468cd02beb80268f69488fa7b248
     <footer class="bg-dark text-white py-3 mt-5">
         <div class="container text-center">
             <p class="mb-0">&copy; 2024 Echipa numele echipei</p>

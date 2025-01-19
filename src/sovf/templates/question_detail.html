@@ -4,8 +4,8 @@
 <div class="container mt-5">
     <div class="card shadow">
         <div class="card-body">
-            <h1>{{ question.title }}</h1>
-            <div>{{ question.content|safe }}</div>
+            <h1 id="question_title">{{ question.title }}</h1>
+            <div id="question_content">{{ question.content|safe }}</div>
 
             <p><a href="{% url 'profile_view' question.author.username %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View profile of {{ question.author.username }}">
                 <strong>{{ question.author.username }}</strong>
@@ -13,31 +13,31 @@
 
             {% if question.author == user %}
                 <div class="d-flex gap-3 mb-4">
-                    <a href="{% url 'question_edit' pk=question.id %}" class="btn btn-warning">Edit Question</a>
-                    <a href="{% url 'question_delete' pk=question.id %}" class="btn btn-danger">Delete Question</a>
+                    <a id="question_edit" href="{% url 'question_edit' pk=question.id %}" class="btn btn-warning">Edit Question</a>
+                    <a id="question_delete" href="{% url 'question_delete' pk=question.id %}" class="btn btn-danger">Delete Question</a>
                 </div>
             {% endif %}
 
             <form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='up' %}" class="d-inline-block">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary me-2">
+                <button id="question_upvote" type="submit" class="btn btn-outline-primary me-2">
                     <i class="bi bi-arrow-up-circle"></i> <!-- Upvote icon -->
                 </button>
             </form>
 
             <form method="post" action="{% url 'vote_on_question' pk=question.pk vote_type='down' %}" class="d-inline-block">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger">
+                <button id="question_downvote" type="submit" class="btn btn-outline-danger">
                     <i class="bi bi-arrow-down-circle"></i> <!-- Downvote icon -->
                 </button>
             </form>
 
-            <p class="mt-3"><strong>Score:</strong> {{ question.score }}</p>
+            <p id="question_score" class="mt-3"><strong>Score:</strong> {{ question.score }}</p>
 
             <h2 class="mt-4">Answers:</h2>
-            <a href="{% url 'answer_create' question.pk %}" class="btn btn-primary mb-3">Add Answer</a>
+            <a id="add_answer" href="{% url 'answer_create' question.pk %}" class="btn btn-primary mb-3">Add Answer</a>
 
-            <ul class="list-group">
+            <ul id="answers_list" class="list-group">
                 {% for answer in question.answers.all %}
                     <li class="list-group-item">
                         {{ answer.content|safe }} - <a href="{% url 'profile_view' question.author.username %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View profile of {{ question.author.username }}">
@@ -46,8 +46,8 @@
 
                         {% if answer.author == user %}
                             <div class="d-flex gap-2 mt-2">
-                                <a href="{% url 'answer_edit' answer.pk %}" class="btn btn-warning btn-sm">Edit</a> |
-                                <a href="{% url 'answer_delete' answer.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                <a id="answer_edit" href="{% url 'answer_edit' answer.pk %}" class="btn btn-warning btn-sm">Edit</a> |
+                                <a id="answer_delete" href="{% url 'answer_delete' answer.pk %}" class="btn btn-danger btn-sm">Delete</a>
                             </div>
                         {% endif %}
 

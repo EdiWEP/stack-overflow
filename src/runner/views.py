@@ -1,11 +1,14 @@
+import docker
 import subprocess
 import os
 import re
+import shutil
 
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, mkdtemp, gettempdir
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.http import HttpResponseBadRequest, JsonResponse
+import docker.errors
 
 class CompilationFailed(Exception):
     """Raised when the submitted code has a compilation error"""
@@ -60,14 +63,19 @@ class CodeRunView(LoginRequiredMixin, View):
 
     def _run_python(self, code) -> tuple[str, str]:
         """Runs Python code and returns stdout and stderr"""
-        with NamedTemporaryFile(suffix=".py", delete=False, mode="w") as temp_file:
-            temp_file_name = temp_file.name
-            temp_file.write(code)
-            temp_file.flush()
+
+        temp_file_name = self.__create_temporary_file(code, "py")
+
+        if "import" in code:
+            return self._run_in_docker_sandbox(
+                temp_file_name=temp_file_name,
+                image="python:3.10-slim",
+                command=f"python /code/{os.path.basename(temp_file_name)}",
+            )
 
         try:
             result = subprocess.run(
-                ["python", temp_file.name],
+                ["python", temp_file_name],
                 capture_output=True,
                 text=True,
                 shell=True,
@@ -82,14 +90,18 @@ class CodeRunView(LoginRequiredMixin, View):
 
     def _run_cpp(self, code) -> tuple[str, str]:
         """Runs C++ code and returns stdout and stderr"""
-        with NamedTemporaryFile(suffix=".cpp", delete=False, mode="w") as temp_file:
-            temp_file_name = temp_file.name
-            temp_file.write(code)
-            temp_file.flush()
+
+        temp_file_name = self.__create_temporary_file(code, "cpp")
+
+        if "include" in code:
+            return self._run_in_docker_sandbox(
+                temp_file_name=temp_file_name,
+                image="gcc:14",
+                command=f"g++ {os.path.basename(temp_file_name)} -o code && ./code"
+            )
 
         try:
             binary_name = temp_file_name.replace(".cpp", ".exe")
-
             compile_result = subprocess.run(
                 ["g++", temp_file_name, "-o", binary_name],
                 capture_output=True,
@@ -127,13 +139,17 @@ class CodeRunView(LoginRequiredMixin, View):
             else:
                 raise InvalidJavaCode
 
-        with NamedTemporaryFile(suffix=".java", delete=False, mode="w") as temp_file:
-            temp_file_name= temp_file.name
-            temp_file.write(code)
-            temp_file.flush()
+        temp_file_name = self.__create_temporary_file(code, "java")
+        class_name = extract_class_name(code)
+
+        if "import" in code:
+            return self._run_in_docker_sandbox(
+                temp_file_name=temp_file_name,
+                image="openjdk:23-jdk-slim",
+                command=f"javac {os.path.basename(temp_file_name)} && java -cp /code {class_name}"
+            )
 
         try:
-            class_name = extract_class_name(code)
 
             compile_result = subprocess.run(
                 ["javac", temp_file_name],
@@ -146,7 +162,7 @@ class CodeRunView(LoginRequiredMixin, View):
                 raise CompilationFailed(compile_result.stdout, compile_result.stderr)
 
             result = subprocess.run(
-                ["java", "-cp", temp_file.name.rsplit("\\", 1)[0], class_name],
+                ["java", "-cp", temp_file_name.rsplit("\\", 1)[0], class_name],
                 capture_output=True,
                 text=True,
                 shell=True,
@@ -159,7 +175,42 @@ class CodeRunView(LoginRequiredMixin, View):
 
         return result.stdout, result.stderr
 
+    def _run_in_docker_sandbox(self, temp_file_name: str, image: str, command: str) -> tuple[str, str]:
+
+        try:
+            docker_client = docker.from_env()
+
+            container = docker_client.containers.run(
+                image=image,
+                command=["/bin/bash", "-c", command],
+                volumes={os.path.dirname(temp_file_name): {"bind": "/code", "mode": "rw"}},
+                stdout=True,
+                stderr=True,
+                working_dir="/code",
+                remove=True
+            )
+
+            stdout = container.decode("utf-8")
+            return stdout, ""
+
+        except docker.errors.ContainerError as exc:
+            return "", exc.stderr.decode("utf-8")
+
+        finally:
+            self.__remove_file(temp_file_name)
+            pass
+
+    def __create_temporary_file(self, code, extension) -> str:
+        """Creates a temporary file in a temporary directory, then returns the path"""
+        temp_dir = mkdtemp(prefix="so_code_run_", dir=gettempdir())
+        temp_file_path = os.path.join(temp_dir, f"code.{extension}")
+
+        with open(temp_file_path, "w") as temp_file:
+            temp_file.write(code)
+
+        return temp_file_path
+
     def __remove_file(self, file_name: str):
         if os.path.exists(file_name):
             os.remove(file_name)
-            pass
+            shutil.rmtree(os.path.dirname(file_name))

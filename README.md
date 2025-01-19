@@ -355,4 +355,5 @@ In principiu, pentru lista de contributii, se poate vedea istoricul de commituri
 Mai precis, componentele high level la care a lucrat fiecare:
 - Eduard-Cristian Podaru: setup al proiectului in django, modelele din aplicatie, routing, view-uri pentru intrebari si raspunsuri, sistemul de badges
 - Radu-Nicolae Trascalie: ordonare, paginare a intrebarilor, functionlitate de search, user profiles, upload de avatar, schimbare de parola
-- Petru Popescu: frontend initial, signup, login, formulare, sistemul de votare, acceptarea raspunsurilor
+- Petru Popescu: frontend update, signup, login, formulare, sistemul de votare, acceptarea raspunsurilor
+- Enciu Cristina: documentatie, frontend initial

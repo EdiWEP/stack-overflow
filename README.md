@@ -1,6 +1,44 @@
 # StackOverflow Clone
 
+Proiectul este o aplicatie web scrisa in Django precum StackOverflow cu elemente de gamification. 
+
+Proiect pentru cursul Managementul si Organizarea Proiectelor Software. Realizat de Eduard-Cristian Podaru (Scrum Master), Cristina Enciu (Product Owner), Petru Popescu (Dezvoltator), Radu-Nicolae Trascalie (Dezvoltator)
+
 Proiect pentru cursul Analiza si Modelarea Sistemelor Software. Realizat de Eduard-Cristian Podaru, Petru Popescu, Radu-Nicolae Trascalie
+
+Am implementat:
+- Inregistrare si autentificare
+- Postare, editare, stergere de intrebari si raspunsuri cu sugestii in comentarii
+- Un feed paginat cu cele mai recente intrebari
+- Search pentru intrebari si raspunsuri
+- Editor de rich text care permite utilizatorilor sa adauge intrebari si raspunsuri cu continut complex, inclusiv code blocks
+- Sistem de upvote/downvote pentru intrebari, raspunsuri, comentarii
+- Profil customizabil pentru fiecare utilizator
+- Sistem care acorda badgeuri pentru useri care ating anumite milestones
+- Unit tests
+- Seeder pentru baza de date pentru a usura development
+- Teste de acceptanta scrise cu Robot Framework
+- Editor pentru scris si testat cod care permite rulare de cod arbitrar in Python, Java, C++
+- Securizarea feature-ului de rulare de cod prin rularea intr-un docker container a codului care contine importuri, in functie de limbajul sau
+
+## Screenshots
+
+### Feed-ul principal de intrebari
+
+![image](https://github.com/user-attachments/assets/539b47d2-2b06-4a9b-aa69-e1a70da16e63)
+
+### Profil customizabil
+
+![image](https://github.com/user-attachments/assets/a86d4466-e5eb-4fde-b303-0ec25f22f1f8)
+
+### Creare de intrebari cu editor de rich text
+
+![image](https://github.com/user-attachments/assets/c8f8cca7-e202-4e49-b4ae-160b7bb92d98)
+
+### Interbare si raspunsuri
+
+![image](https://github.com/user-attachments/assets/82a3128f-05c7-4710-b30f-6978c7b344de)
+
 
 # Diagrame
 

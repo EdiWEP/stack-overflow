@@ -41,7 +41,7 @@
                 {% for answer in question.answers.all %}
                     <li class="list-group-item">
                         {{ answer.content|safe }} - <a href="{% url 'profile_view' question.author.username %}" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="View profile of {{ question.author.username }}">
-                            <strong>{{ question.author.username }}</strong>
+                            <strong>{{ answer.author.username }}</strong>
                         </a>
 
                         {% if answer.author == user %}

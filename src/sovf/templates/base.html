@@ -16,7 +16,7 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light">
                 <div class="container-fluid">
-                    <a class="navbar-brand d-flex align-items-center" href="#">
+                    <a class="navbar-brand d-flex align-items-center" href="/">
                         <img id="logo" src="https://static-00.iconduck.com/assets.00/stack-icon-2048x2048-7bmccv3l.png" alt="Logo" width="40" height="40">
                         <span class="ms-2 h4 mb-0 text-white">StackOver</span>
                     </a>
@@ -88,7 +88,7 @@
         document.getElementById("toggle-sidebar").addEventListener("click", function() {
             if (!editor) {
                 editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
-                    mode: "python", 
+                    mode: "python",
                     theme: "dracula",
                     lineNumbers: true,
                     matchBrackets: true,
@@ -99,7 +99,7 @@
         });
 
         document.getElementById("run-code").addEventListener("click", function() {
-            const code = editor.getValue(); 
+            const code = editor.getValue();
             const language = document.getElementById("language-select").value;
             const outputContainer = document.getElementById("output-container");
 
@@ -120,7 +120,7 @@
 
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-           
+
             fetch(url, {
     method: "POST",
     headers: {
@@ -130,11 +130,11 @@
     body: code
 })
 .then(response => {
-    console.log(response); 
+    console.log(response);
     return response.json();
 })
 .then(data => {
-    console.log(data); 
+    console.log(data);
     outputContainer.innerHTML = `
         <strong>Output:</strong><pre>${data.stdout}</pre>
         <strong>Errors:</strong><pre>${data.stderr}</pre>
@@ -142,7 +142,7 @@
     `;
 })
 .catch(err => {
-    console.error("Error:", err); 
+    console.error("Error:", err);
     outputContainer.innerHTML = "<strong>Error running the code.</strong>";
 });
         });</script>

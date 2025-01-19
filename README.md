@@ -21,6 +21,46 @@ Am implementat:
 - Editor pentru scris si testat cod care permite rulare de cod arbitrar in Python, Java, C++
 - Securizarea feature-ului de rulare de cod prin rularea intr-un docker container a codului care contine importuri, in functie de limbajul sau
 
+## Setup
+Pentru a porni aplicatia, trebuie instalate `requirements.txt`
+
+```bash
+pip install -r requirements.txt
+```
+
+Pentru a functiona integral feature-ul de code running, trebuie instalat si pornit Docker (Docker Desktop pentru Windows)
+
+Optional, se poate da pull manual la imaginile de Docker folosite pentru functionalitatea de code running:
+
+```bash
+docker pull openjdk:23-jdk-slim gcc:14 python:3.10-slim
+```
+Altfel, se va da pull automat la prima rulare cu un anumit limbaj
+
+Apoi se poate rula seederul pentru baza de date:
+
+```bash
+python manage.py seed
+```
+
+Apoi se poate porni aplicatia cu comanda:
+
+```bash
+python manage.py runserver
+```
+
+Pentru a rula unit testele:
+
+```bash
+python manage.py test sovf.tests
+```
+
+Pentru a rula testele de acceptanta, din directorul `robot_tests`:
+
+```bash
+python -m robot .
+```
+
 ## Screenshots
 
 ### Feed-ul principal de intrebari

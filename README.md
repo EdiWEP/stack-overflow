@@ -80,6 +80,12 @@ python -m robot .
 ![image](https://github.com/user-attachments/assets/82a3128f-05c7-4710-b30f-6978c7b344de)
 
 
+---------------------------------------------------------------------------------------
+
+# Mai jos este documentatia proiectului pentru Analiza si Modelarea Sistemelor Software
+
+---------------------------------------------------------------------------------------
+
 # Diagrame
 
 ## Diagrama Use-case
